@@ -1,0 +1,44 @@
+pipeline {
+    agent {label "master"}
+
+    stages {
+        stage('Clone codebase') {
+            steps {
+                echo 'cloning project source from GitHub'
+                git 'https://github.com/Oxilia/maven-project.git'
+            }
+        }
+        stage('Compiling') {
+            steps {
+                echo 'compiling project'
+                withMaven(maven : 'localMaven'){
+                    sh "mvn compile"
+                }
+            }
+        }
+        stage('Testing') {
+            steps {
+                echo 'Run Unit test of project'
+                withMaven(maven : 'localMaven'){
+                    sh "mvn test"
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Building project'
+                withMaven(maven : 'localMaven'){
+                    sh "mvn -B -DskipTests clean package"
+                }
+            }
+        }
+        stage('SonarQube analysis') {
+            steps {
+                echo 'Run Sonar Analysis and gather stats'
+                withSonarQubeEnv(installationName:'sonarServer', credentialsId: 'cred4sonar'){
+                    sh "mvn -B -DskipTests clean package sonar:sonar"
+                }
+            }
+        }
+    }
+}
