@@ -5,7 +5,7 @@ pipeline {
         stage('Clone codebase') {
             steps {
                 echo 'cloning project source from GitHub'
-                git 'https://github.com/Oxilia/maven-project.git'
+                git ( url :'https://github.com/Oxilia/maven-project.git', branch : 'master', credentialsId: 'cred4github')
             }
         }
         stage('Compiling') {
